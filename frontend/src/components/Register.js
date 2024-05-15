@@ -37,7 +37,7 @@ const Register = () => {
   
       xhr.onload = () => {
         if (xhr.status === 200) {
-          const response = JSON.parse(xhr.responseText);
+          const response = JSON.parse(xhr.responseText); 
           console.log(response.data); 
           navigate('/');
         } else {

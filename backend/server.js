@@ -15,6 +15,7 @@ const { socket: socketFunction } = require('./controllers/soketController');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
+const { googleLogin } = require('./controllers/userController');
 
 
 
@@ -43,14 +44,7 @@ const sessionConfig = {
   saveUninitialized: true
 };
 
-const generateToken = (user) => {
-  const payload = {
-    email: user.email,
-    password: user.password,
-    id: user.id,
-  };
-  return jwt.sign(payload, 'crud', { expiresIn: '24h' });
-};
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -73,63 +67,20 @@ testConnection()
     app.use('/api', categoryRoutes);
     app.use('/api', productRoutes);
 
-    // Google login route
+
+
+    
+    
     app.get('/api/auth/google', passport.authenticate('google', {
       scope: ['profile', 'email']
     }));
-
-    // Google login callback route
+    
     app.get('/api/auth/google/callback', passport.authenticate('google', {
       failureRedirect: '/login'
-    }), async (req, res) => {
-      // User has authenticated, redirect to protected route
-
-      const [existingUser] = await sequelize.query('SELECT * FROM users WHERE email = ? ',
-      { replacements: [req.user.email], type: QueryTypes.SELECT });
-
-      if (!existingUser) {
-        const result = await sequelize.query(
-          'INSERT INTO users (email, name, password, loginType) VALUES (?, ?, ?, ?)',
-          {
-            replacements: [req.user.email, req.user.name, null, 'google'],
-            type: QueryTypes.INSERT
-          }
-        );
-        res.redirect('http://localhost:3000');
-      } else if(existingUser){
+    }), googleLogin);
 
 
-        const [existingUserLoginWith] = await sequelize.query('SELECT loginType FROM users WHERE email = ? ',
-        { replacements: [req.user.email], type: QueryTypes.SELECT });
 
-        console.log(existingUserLoginWith.loginType);
-
-        if(existingUserLoginWith.loginType == 'google'){
-          const token = generateToken(existingUser);
-          console.log(existingUser.id);
-          console.log("user login with google" , token);
-          res.redirect('http://localhost:3000/allPost');
-        }else{
-          console.log("user not login with google");
-        }
-        
-
-      }else{
-        res.redirect('/protected');
-      }
-
-
-    });
-
-    // Protected route
-    app.get('/protected', (req, res) => {
-      // Check if user is authenticated
-      if (req.isAuthenticated()) {
-        res.send(`Welcome, ${req.user.displayName}!`);
-      } else {
-        res.status(401).send('Unauthorized');
-      }
-    });
 
     const server = http.createServer(app);
     socketFunction(server);

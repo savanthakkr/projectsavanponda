@@ -443,7 +443,12 @@ const findRoomByUserId = async (req, res) => {
       }
     );
 
-    console.log(rooms);
+    console.log(rooms[0].user_id);
+
+    const finduserIdFromRoom = rooms[0].user_id.includes(userId); 
+
+
+    console.log(finduserIdFromRoom);
 
 
     const roomsCreatedId = await sequelize.query(
@@ -453,8 +458,23 @@ const findRoomByUserId = async (req, res) => {
       }
     );
 
-    console.log(roomsCreatedId);
+    const finduserIdFromCreatedRoom = roomsCreatedId.includes(userId); 
 
+    console.log(finduserIdFromCreatedRoom);
+
+
+    if(finduserIdFromRoom || finduserIdFromCreatedRoom){
+      const roomsGet = await sequelize.query(
+        'SELECT * FROM rooms ',
+        {
+          type: sequelize.QueryTypes.SELECT,
+        }
+      );
+      res.json(roomsGet);
+    }
+
+
+    
 
   } catch (error) {
     console.error('Error finding room by user ID:', error);
@@ -462,6 +482,48 @@ const findRoomByUserId = async (req, res) => {
   }
 };
 
+
+
+const googleLogin = async (req, res) => {
+  
+  const [existingUser] = await sequelize.query('SELECT * FROM users WHERE email = ? ',
+    { replacements: [req.user.email], type: QueryTypes.SELECT });
+
+    if (!existingUser) {
+      const result = await sequelize.query(
+        'INSERT INTO users (email, name, password, loginType) VALUES (?, ?, ?, ?)',
+        {
+          replacements: [req.user.email, req.user.name, null, 'google'],
+          type: QueryTypes.INSERT
+        }
+      );
+      res.redirect('http://localhost:3000');
+    } else if(existingUser){
+
+
+      const [existingUserLoginWith] = await sequelize.query('SELECT loginType FROM users WHERE email = ? ',
+      { replacements: [req.user.email], type: QueryTypes.SELECT });
+
+      console.log(existingUserLoginWith.loginType);
+
+      if(existingUserLoginWith.loginType == 'google'){
+        const token = generateToken(existingUser);
+        console.log(token);
+        const decoded = jwt.verify(token, 'crud');
+        console.log(decoded);
+        console.log(existingUser.id);
+        console.log("user login with google" , token);
+        res.redirect('http://localhost:3000/allPost');
+      }else{
+        console.log("user not login with google");
+      }
+      
+
+    }else{
+      res.message('faileld');
+    }
+
+}
 
 // const findRoomByUserId = async (req, res) => {
 //   try {
@@ -558,6 +620,7 @@ module.exports = {
   findRoomByUserId,
   getUserProfile,
   getImage,
+  googleLogin,
   OTPVerify,
   sendPasswordOTP,
   OTPVerifyEmail,

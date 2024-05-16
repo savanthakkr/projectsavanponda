@@ -8,11 +8,6 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 
 
-// ClientID = "637855648446-70ici1ptfosdhrnu0v9rancvirhn0mkf.apps.googleusercontent.com"
-
-// Clientsecret = "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"
-// callbackUrl = "/api/google/callback"
-
 const generateToken = (user) => {
   const payload = {
     email: user.email,

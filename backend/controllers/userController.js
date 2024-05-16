@@ -8,6 +8,7 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 
 
+
 const generateToken = (user) => {
   const payload = {
     email: user.email,

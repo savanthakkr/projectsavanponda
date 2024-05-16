@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { Container, Form, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useCookies } from "react-cookie";
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [cookies, removeCookie] = useCookies([]);
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e) => {
@@ -38,11 +40,24 @@ const Login = () => {
     }
   };
 
-  const routeChange = () =>{ 
+
+
+  const routeChange =  () =>{ 
+    
     let path = `/register`; 
     navigate(path);
   }
 
+  const changeGoogleRout = async () => {
+    console.log(cookies.token)
+    if (!cookies.token) {
+      navigate("/login");
+    }
+    let path = window.location.href= "http://localhost:5000/api/auth/google";
+    navigate(path)
+
+    localStorage.setItem('accessToken', cookies.token);
+  }
 
 
   return (
@@ -76,9 +91,8 @@ const Login = () => {
           </Button>
         </Form>
 
-        <button onClick={()=>
-          window.location.href= "http://localhost:5000/api/auth/google"
-        } className="btn btn-primary mt-3 w-100">
+        <button onClick={changeGoogleRout} 
+        className="btn btn-primary mt-3 w-100">
           Login with Google
         </button>
         <br></br>

@@ -430,7 +430,7 @@ const findRoomByUserId = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    console.log(userId);
+    console.log(userId, "login user find room user id ");
 
     const rooms = await sequelize.query(
       'SELECT user_id FROM rooms ',
@@ -454,7 +454,7 @@ const findRoomByUserId = async (req, res) => {
       }
     );
 
-    const finduserIdFromCreatedRoom = roomsCreatedId.includes(userId); 
+    const finduserIdFromCreatedRoom = roomsCreatedId == userId; 
 
     console.log(finduserIdFromCreatedRoom);
 
@@ -505,11 +505,14 @@ const googleLogin = async (req, res) => {
       if(existingUserLoginWith.loginType == 'google'){
         const token = generateToken(existingUser);
         console.log(token);
+        res.cookie("token", token);
         const decoded = jwt.verify(token, 'crud');
         console.log(decoded);
+        
         console.log(existingUser.id);
         console.log("user login with google" , token);
         res.redirect('http://localhost:3000/allPost');
+        
       }else{
         console.log("user not login with google");
       }
@@ -520,6 +523,10 @@ const googleLogin = async (req, res) => {
     }
 
 }
+
+
+
+
 
 // const findRoomByUserId = async (req, res) => {
 //   try {

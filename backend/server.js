@@ -17,8 +17,6 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const session = require('express-session');
 const { googleLogin } = require('./controllers/userController');
 
-
-
 // Passport configuration
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
@@ -44,8 +42,6 @@ const sessionConfig = {
   saveUninitialized: true
 };
 
-
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -66,21 +62,14 @@ testConnection()
     app.use('/api', userRoutes);
     app.use('/api', categoryRoutes);
     app.use('/api', productRoutes);
-
-
-
-    
     
     app.get('/api/auth/google', passport.authenticate('google', {
       scope: ['profile', 'email']
     }));
     
     app.get('/api/auth/google/callback', passport.authenticate('google', {
-      failureRedirect: '/login'
+      failureRedirect: '/login',
     }), googleLogin);
-
-
-
 
     const server = http.createServer(app);
     socketFunction(server);

@@ -454,9 +454,9 @@ const findRoomByUserId = async (req, res) => {
       }
     );
 
-    const finduserIdFromCreatedRoom = roomsCreatedId == userId; 
+    const finduserIdFromCreatedRoom = roomsCreatedId[0].created_user_id === userId; 
 
-    console.log(finduserIdFromCreatedRoom);
+    console.log(roomsCreatedId, finduserIdFromCreatedRoom);
 
 
     if(finduserIdFromRoom || finduserIdFromCreatedRoom){

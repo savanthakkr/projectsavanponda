@@ -49,7 +49,7 @@ const Login = () => {
   }
 
   const changeGoogleRout = async () => {
-    console.log(cookies.token)
+    console.log(cookies.token, "skjdjkshdasiudaopidaudeoiqwhdeqwewmnebdasnbdnmasdb asmndbasmndbasnmdb")
     if (!cookies.token) {
       navigate("/login");
     }
@@ -57,6 +57,8 @@ const Login = () => {
     navigate(path)
 
     localStorage.setItem('accessToken', cookies.token);
+
+    console.log();
   }
 
 

@@ -19,6 +19,7 @@ import UserRooms from './components/roomAll';
 import ChatRoomScreen from './components/chatRoomScreen';
 import ChatBody from './components/chatScreen';
 import ChatRoomScreenMain from './components/chatRoomScreenMain';
+import UserList from './components/userList'; 
 
 const socket = socketIO.connect('http://localhost:5000', {
     transports: ['websocket', 'polling']
@@ -41,9 +42,9 @@ function App() {
       <Route path='/sendOTP' element={<SendOTPEmail/>}/>
       <Route path='/updatePass' element={<ForgatePass/>}/>
       <Route path='/UserRooms' element={<UserRooms/>}/>
+      <Route path='/userList' element={<UserList/>}/>
       <Route path='/chatRoomScreen/:id' element={<ChatRoomScreen/>}/>
       <Route path='/chatRoomMainScreen/:id' element={<ChatRoomScreenMain/>}/>
-      
     </Routes>
   );
 }

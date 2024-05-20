@@ -13,6 +13,7 @@ const socket = io.connect("http://localhost:5000", {
 
 const Posts = () => {
   const [posts, setPosts] = useState([]);
+  const [FollowStatus, setFollowStatus] = useState([]);
   // const [like, setLike] = useState(0);
   const [dislike, setDislike] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -41,6 +42,24 @@ const Posts = () => {
     };
 
 
+    const getFollowStatus = () => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', 'http://localhost:5000/api/getFollowStatus', true);
+      xhr.setRequestHeader('Authorization', token);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          if (xhr.status === 200) {
+            setFollowStatus(JSON.parse(xhr.responseText));
+            console.log(FollowStatus);
+          } else {
+            console.error('Error fetching products:', xhr.statusText);
+          }
+        }
+      };
+      xhr.send();
+    };
+
+    getFollowStatus();
     fetchPosts();
   }, []);
 
@@ -81,34 +100,46 @@ const Posts = () => {
 
   const handleFollowClick = async (userId) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/userFollow', { followingId: userId }, {
-        headers: {
-          Authorization: token,
-          'Content-Type': 'application/json'
-        }
-      });
 
-      if (response.status === 200) {
-        setPosts(prevPosts =>
-          prevPosts.map(post =>
-            userId === post.userId
-              ? { ...post, isFollowing: !post.isFollowing }
-              : post
-          )
-        );
-        if (response.data.message === 'Followed successfully') {
-          setIsFollowing(true);
-        } else if (response.data.message === 'Unfollowed successfully') {
-          setIsFollowing(false);
+
+      console.log(userId === posts[2].userId);
+
+      if (userId != posts[2].userId) {
+        const response = await axios.post('http://localhost:5000/api/userFollow', { followingId: userId }, {
+          headers: {
+            Authorization: token,
+            'Content-Type': 'application/json'
+          }
+        });
+
+
+        if (response.status === 200) {
+          setPosts(prevPosts =>
+            prevPosts.map(post =>
+              userId === post.userId
+                ? { ...post, isFollowing: !post.isFollowing }
+                : post,
+
+            ),
+
+          );
+          console.log(posts[2].userId);
+          if (response.data.message === 'Followed successfully') {
+            setIsFollowing(true);
+          } else if (response.data.message === 'Unfollowed successfully') {
+            setIsFollowing(false);
+          }
+          console.log(userId);
+        } else {
+          console.error('Error adding like:', response.data);
         }
-        console.log(userId);
-      } else {
-        console.error('Error adding like:', response.data);
       }
     } catch (error) {
       console.error('Error adding like:', error);
     }
   };
+
+
 
 
   const handleLike = async (userId) => {
@@ -146,12 +177,17 @@ const Posts = () => {
     navigate('/UserRooms');
   };
 
+  const handleCreateUser = () => {
+    navigate('/userList');
+  };
+
   return (
     <div>
       <button className="btn btn-primary btn-sm mx-3" type="button" onClick={handleAddPost}>Add Post</button>
       <button className="btn btn-primary btn-sm mx-3" type="button" onClick={handleUpdateProfile}>Update Profile</button>
       <button className="btn btn-warning btn-sm mx-5" type="button" onClick={handleLogout}>Log Out</button>
       <button onClick={handleCreateRoomClick}>Create Chat Room</button>
+      <button onClick={handleCreateUser}>user List</button>
       <button onClick={handleCreateShowRoom}>show All Room</button>
       {posts.map((post) => (
         <div key={post.id}>
@@ -162,8 +198,8 @@ const Posts = () => {
           <p>Likes: {post.likeCount}</p>
           <button onClick={() => handleLike(post.id)}>Like</button>
           <button onClick={() => handleFollowClick(post.userId)}>
-            {post.isFollowing ? 'Unfollow' : 'Follow'}
-          </button>
+                {post.isFollowing ? 'Unfollow' : 'Follow'}
+              </button>
           {/* <button className="Edit" type="button" onClick={() => navigate(`/addComment/${post.id}`)}>
             Add Comment
           </button> */}

@@ -53,7 +53,7 @@ const ChatRoom = () => {
       }
 
       try {
-        const response = await axios.get('http://localhost:5000/api/users/profile', {
+        const response = await axios.get('http://localhost:5000/api/users/getUserProfileFollowOnly', {
           headers: {
             Authorization: token,
           },

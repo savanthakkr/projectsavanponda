@@ -476,6 +476,35 @@ const adddislike = async (req, res) => {
 }
 
 
+const follow = async (req, res) => {
+  const followerId = req.user.id;
+  const { followingId } = req.body;
+
+  await sequelize.query(
+    'INSERT INTO user_follows (user_id,following_user_id) VALUES (?, ?)',
+    {
+      replacements: [followerId, followingId],
+      type: sequelize.QueryTypes.INSERT
+    }
+  );
+  res.json({ message: 'follow successfully added' });
+}
+const unfollow = async (req, res) => {
+  const followerId = req.user.id;
+  const { followingId } = req.body;
+
+
+  await sequelize.query(
+    'DELETE FROM user_follows WHERE user_id = ? AND following_user_id = ?',
+    {
+      replacements: [followerId, followingId],
+      type: sequelize.QueryTypes.INSERT
+    }
+  );
+  res.json({ message: 'unfollow successfully added' });
+  
+}
+
 
 
 
@@ -526,6 +555,23 @@ const followUnfollow = async (req, res) => {
   }
 };
 
+
+
+
+
+const getFollowStatus = async (req, res) => {
+  const userId = req.user.id;
+
+  const followStatus = await sequelize.query(
+    'SELECT followStatus FROM user_follows WHERE user_id = ?',
+    {
+      replacements: [userId],
+      type: sequelize.QueryTypes.SELECT
+    }
+  );
+
+  res.json(followStatus);
+}
 
 
 
@@ -594,4 +640,4 @@ const getMessagesSender = async (req, res) => {
 
 
 
-module.exports = {followUnfollow, getMessages,getMessagesSender, sendMessage, createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, searchProducts, addPost, countLike, addlike, addlike_dislike, adddislike, addComment, getPost, getCommentsByPostId, getPostByPostId };
+module.exports = {follow, unfollow, getFollowStatus, followUnfollow, getMessages,getMessagesSender, sendMessage, createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, searchProducts, addPost, countLike, addlike, addlike_dislike, adddislike, addComment, getPost, getCommentsByPostId, getPostByPostId };

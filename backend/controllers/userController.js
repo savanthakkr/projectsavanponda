@@ -310,6 +310,27 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+
+const getUserProfileFollowOnly = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const users = await sequelize.query(
+      `SELECT * FROM users
+      WHERE id != :userId
+      AND (id IN (SELECT following_user_id FROM user_follows WHERE user_id = :userId)
+           OR id IN (SELECT user_id FROM user_follows WHERE following_user_id = :userId))`,
+      {
+        replacements: { userId },
+        type: sequelize.QueryTypes.SELECT
+      }
+    );
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 const updateUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -624,6 +645,7 @@ module.exports = {
   getUserProfile,
   getImage,
   googleLogin,
+  getUserProfileFollowOnly,
   OTPVerify,
   sendPasswordOTP,
   OTPVerifyEmail,

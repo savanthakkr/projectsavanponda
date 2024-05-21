@@ -476,43 +476,87 @@ const adddislike = async (req, res) => {
 }
 
 
+
+
 const follow = async (req, res) => {
   const followerId = req.user.id;
   const { followingId } = req.body;
 
   await sequelize.query(
-    'INSERT INTO user_follows (user_id,following_user_id) VALUES (?, ?)',
+    'INSERT INTO userfollows (follower_id, following_id, status) VALUES (?, ?, ?)',
     {
-      replacements: [followerId, followingId],
+      replacements: [followerId, followingId, 'pending'],
       type: sequelize.QueryTypes.INSERT
     }
   );
-  res.json({ message: 'follow successfully added' });
+  res.json({ message: 'follow request sent' });
 }
+
 const unfollow = async (req, res) => {
   const followerId = req.user.id;
   const { followingId } = req.body;
 
-
   await sequelize.query(
-    'DELETE FROM user_follows WHERE user_id = ? AND following_user_id = ?',
+    'DELETE FROM userfollows WHERE follower_id = ? AND following_id = ?',
     {
       replacements: [followerId, followingId],
-      type: sequelize.QueryTypes.INSERT
+      type: sequelize.QueryTypes.DELETE
     }
   );
-  res.json({ message: 'unfollow successfully added' });
-  
+  res.json({ message: 'unfollow successfully' });
 }
 
 
+const getFollowRequests = async (req, res) => {
+  const userId = req.user.id;
+
+  const followRequests = await sequelize.query(
+    'SELECT * FROM userfollows uf JOIN users u ON uf.following_id  = u.id WHERE uf.following_id = ? AND uf.status = ?',
+    {
+      replacements: [userId, 'pending'],
+      type: sequelize.QueryTypes.SELECT
+    }
+  );
+
+  res.json(followRequests);
+}
+
+const acceptFollowRequest = async (req, res) => {
+  const userId = req.user.id;
+  const { followingId, followerId } = req.body;
+
+
+  console.log(followingId[1]);
+
+  await sequelize.query(
+    'UPDATE userfollows SET status = ? WHERE follower_id = ? AND following_id = ?',
+    {
+      replacements: ['accepted', followingId[1], followingId[0]],
+      type: sequelize.QueryTypes.UPDATE
+    }
+  );
+  res.json({ message: 'follow request accepted' });
+}
+
+const declineFollowRequest = async (req, res) => {
+  const userId = req.user.id;
+  const { followingId } = req.body;
+
+  await sequelize.query(
+    'DELETE FROM userfollows WHERE follower_id = ? AND following_id = ?',
+    {
+      replacements: [userId, followingId],
+      type: sequelize.QueryTypes.DELETE
+    }
+  );
+  res.json({ message: 'follow request declined' });
+}
+
+
+// provide also that user list thst user accept request and also show total count of accept user 
 
 
 
-
-
-
-// impliment this api in above react js code 
 
 
 const followUnfollow = async (req, res) => {
@@ -638,75 +682,5 @@ const getMessagesSender = async (req, res) => {
 // comment add on perticuler post 
 // count total number of like 
 
-const unFollowApi = async (req, res) => {
- 
-  
-}
 
-
-const followApi = async (req, res) => {
-  const { userId } = req.body;
-  const { id: currentUserId } = req.user;
-
-  if (currentUserId === userId) {
-    return res.status(400).json({ error: 'Cannot follow yourself' });
-  }
-
-  const follow = await sequelize.query(`SELECT * FROM follows WHERE user_id =? AND follow_id =?`, [currentUserId, userId]);
-  if (follow.length > 0) {
-    return res.status(400).json({ error: 'Already sent a follow request' });
-  }
-
-  await sequelize.query(`INSERT INTO follows (user_id, follow_id, status) VALUES (?,?, 'pending')`, [currentUserId, userId]);
-
-  res.json({ message: 'Follow request sent successfully' });
-}
-
-const followers = async (req, res) => {
-  const { id: currentUserId } = req.user;
-
-  const followers = await sequelize.query(`SELECT * FROM follows WHERE follow_id =? AND status = 'following'`, [currentUserId]);
-
-  res.json(followers);
-}
-
-const following = async (req, res) => {
-  const { id: currentUserId } = req.user;
-
-  const following = await sequelize.query(`SELECT * FROM follows WHERE user_id =? AND status = 'following'`, [currentUserId]);
-
-  res.json(following);
-}
-
-const confirm = async (req, res) => {
-  const { followId } = req.body;
-  const { id: currentUserId } = req.user;
-
-  const follow = await sequelize.query(`SELECT * FROM follows WHERE id =? AND follow_id =?`, [followId, currentUserId]);
-  if (!follow.length) {
-    return res.status(404).json({ error: 'Follow request not found' });
-  }
-
-  await sequelize.query(`UPDATE follows SET status = 'following' WHERE id =?`, [followId]);
-
-  res.json({ message: 'Follow request confirmed successfully' });
-}
-
-const unfollowApi = async (req, res) => {
-  const { userId } = req.body;
-  const { id: currentUserId } = req.user;
-
-  const follow = await sequelize.query(`SELECT * FROM follows WHERE user_id =? AND follow_id =?`, [currentUserId, userId]);
-  if (!follow.length) {
-    return res.status(404).json({ error: 'Follow not found' });
-  }
-
-  await sequelize.query(`DELETE FROM follows WHERE user_id =? AND follow_id =?`, [currentUserId, userId]);
-
-  res.json({ message: 'Unfollowed successfully' });
-}
-
-
-
-
-module.exports = {follow, confirm, following, followApi, unfollowApi, followers, unfollow, getFollowStatus, followUnfollow, getMessages,getMessagesSender, sendMessage, createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, searchProducts, addPost, countLike, addlike, addlike_dislike, adddislike, addComment, getPost, getCommentsByPostId, getPostByPostId };
+module.exports = {getFollowRequests, acceptFollowRequest, declineFollowRequest, follow, unfollow, getFollowStatus, followUnfollow, getMessages,getMessagesSender, sendMessage, createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, searchProducts, addPost, countLike, addlike, addlike_dislike, adddislike, addComment, getPost, getCommentsByPostId, getPostByPostId };

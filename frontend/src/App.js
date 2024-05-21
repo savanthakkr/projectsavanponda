@@ -20,6 +20,7 @@ import ChatRoomScreen from './components/chatRoomScreen';
 import ChatBody from './components/chatScreen';
 import ChatRoomScreenMain from './components/chatRoomScreenMain';
 import UserList from './components/userList'; 
+import FollowRequests from './components/followRequest';
 
 const socket = socketIO.connect('http://localhost:5000', {
     transports: ['websocket', 'polling']
@@ -43,6 +44,7 @@ function App() {
       <Route path='/updatePass' element={<ForgatePass/>}/>
       <Route path='/UserRooms' element={<UserRooms/>}/>
       <Route path='/userList' element={<UserList/>}/>
+      <Route path='/followRequests' element={<FollowRequests/>}/>
       <Route path='/chatRoomScreen/:id' element={<ChatRoomScreen/>}/>
       <Route path='/chatRoomMainScreen/:id' element={<ChatRoomScreenMain/>}/>
     </Routes>

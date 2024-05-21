@@ -181,12 +181,18 @@ const Posts = () => {
     navigate('/userList');
   };
 
+
+  const handleFollowRequest = () => {
+    navigate('/followRequests');
+  };
+
   return (
     <div>
       <button className="btn btn-primary btn-sm mx-3" type="button" onClick={handleAddPost}>Add Post</button>
       <button className="btn btn-primary btn-sm mx-3" type="button" onClick={handleUpdateProfile}>Update Profile</button>
       <button className="btn btn-warning btn-sm mx-5" type="button" onClick={handleLogout}>Log Out</button>
       <button onClick={handleCreateRoomClick}>Create Chat Room</button>
+      <button onClick={handleFollowRequest}>followRequests</button>
       <button onClick={handleCreateUser}>user List</button>
       <button onClick={handleCreateShowRoom}>show All Room</button>
       {posts.map((post) => (

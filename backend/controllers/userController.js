@@ -317,10 +317,10 @@ const getUserProfileFollowOnly = async (req, res) => {
     const users = await sequelize.query(
       `SELECT * FROM users
       WHERE id != :userId
-      AND (id IN (SELECT following_user_id FROM user_follows WHERE user_id = :userId)
-           OR id IN (SELECT user_id FROM user_follows WHERE following_user_id = :userId))`,
+      AND (id IN (SELECT 	following_id FROM userfollows WHERE follower_id  = :userId AND status = 'accepted')
+           OR id IN (SELECT 	follower_id  FROM userfollows WHERE following_id = :userId AND status = 'accepted'))`,
       {
-        replacements: { userId },
+        replacements: { userId},
         type: sequelize.QueryTypes.SELECT
       }
     );

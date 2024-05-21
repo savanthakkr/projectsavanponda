@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
-const {confirm, unfollowApi, following, followApi, followers, getFollowStatus, follow, unfollow, createProduct, getAllProducts, getProductById,followUnfollow,getMessages,getMessagesSender, updateProduct,sendMessage, deleteProduct, searchProducts,addPost,addComment,addlike,addlike_dislike,adddislike,countLike,getPost, getCommentsByPostId, getPostByPostId} = productController;
+const {getFollowStatus, getFollowRequests, declineFollowRequest, acceptFollowRequest, follow, unfollow, createProduct, getAllProducts, getProductById,followUnfollow,getMessages,getMessagesSender, updateProduct,sendMessage, deleteProduct, searchProducts,addPost,addComment,addlike,addlike_dislike,adddislike,countLike,getPost, getCommentsByPostId, getPostByPostId} = productController;
 const { verifyToken } = require("../middlewares/roleMiddleware");
 
 // Create a new product
@@ -12,22 +12,15 @@ router.post('/addPost',verifyToken, addPost);
 
 router.put('/addLike_dislike/:id',verifyToken, adddislike );
 
-router.put('/confirm',verifyToken, confirm );
-
-router.post('/followApi',verifyToken, followApi);
-
-router.get('/following',verifyToken, following);
-
-router.get('/followers',verifyToken, followers);
-
 router.post('/adddlikedislike',verifyToken, addlike_dislike);
 
+router.put('/acceptFollowRequest',verifyToken, acceptFollowRequest);
+
+router.post('/declineFollowRequest',verifyToken, declineFollowRequest);
 
 router.post('/follow',verifyToken, follow);
 
 router.delete('/unfollow',verifyToken, unfollow);
-
-router.delete('/unfollowApi',verifyToken, unfollowApi);
 
 router.post('/sendMessage/:id',verifyToken, sendMessage);
 
@@ -36,6 +29,8 @@ router.post('/userFollow',verifyToken, followUnfollow);
 router.post('/addComment/:id',verifyToken, addComment);
 
 router.post('/addlike',verifyToken, addlike);
+
+router.get('/getFollowRequests',verifyToken, getFollowRequests);
 
 router.get('/countLike/:id',verifyToken, countLike);
 

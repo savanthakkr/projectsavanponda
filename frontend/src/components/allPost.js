@@ -203,9 +203,9 @@ const Posts = () => {
           <p>Comments: {post.comments}</p>
           <p>Likes: {post.likeCount}</p>
           <button onClick={() => handleLike(post.id)}>Like</button>
-          <button onClick={() => handleFollowClick(post.userId)}>
+          {/* <button onClick={() => handleFollowClick(post.userId)}>
                 {post.isFollowing ? 'Unfollow' : 'Follow'}
-              </button>
+              </button> */}
           {/* <button className="Edit" type="button" onClick={() => navigate(`/addComment/${post.id}`)}>
             Add Comment
           </button> */}

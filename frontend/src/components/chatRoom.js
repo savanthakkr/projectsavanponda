@@ -99,6 +99,12 @@ const ChatRoom = () => {
               }}
             />
             <label>{user.name}</label>
+            <button className="btn btn-primary btn-sm mx-5" type="button" onClick={() => {
+            localStorage.setItem('accessPostId', user.id);
+            navigate(`/chatBody/${localStorage.getItem('accessPostId')}`);
+          }}>
+            Chat
+          </button>
           </div>
         ))}
       </div>

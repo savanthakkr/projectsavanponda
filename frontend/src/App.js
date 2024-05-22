@@ -21,6 +21,7 @@ import ChatBody from './components/chatScreen';
 import ChatRoomScreenMain from './components/chatRoomScreenMain';
 import UserList from './components/userList'; 
 import FollowRequests from './components/followRequest';
+import Subscription from './components/subscribePlan';
 
 const socket = socketIO.connect('http://localhost:5000', {
     transports: ['websocket', 'polling']
@@ -39,6 +40,7 @@ function App() {
       <Route path="/search" element={<Search />} />
       <Route path="/updateProduct/:id" element={<UpdateProduct />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/subscribePlan" element={<Subscription />} />
       <Route path='/otp' element={<OTPscreen/>}/>
       <Route path='/sendOTP' element={<SendOTPEmail/>}/>
       <Route path='/updatePass' element={<ForgatePass/>}/>

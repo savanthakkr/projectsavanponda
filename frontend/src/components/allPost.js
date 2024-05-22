@@ -14,6 +14,7 @@ const socket = io.connect("http://localhost:5000", {
 const Posts = () => {
   const [posts, setPosts] = useState([]);
   const [FollowStatus, setFollowStatus] = useState([]);
+  const [SubscribePlan, setSubscribePlan] = useState([]);
   // const [like, setLike] = useState(0);
   const [dislike, setDislike] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -59,8 +60,26 @@ const Posts = () => {
       xhr.send();
     };
 
+    const getSubscribePlan = () => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', 'http://localhost:5000/api/getSubscribePlan', true);
+      xhr.setRequestHeader('Authorization', token);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          if (xhr.status === 200) {
+            setSubscribePlan(JSON.parse(xhr.responseText));
+            console.log(SubscribePlan);
+          } else {
+            console.error('Error fetching products:', xhr.statusText);
+          }
+        }
+      };
+      xhr.send();
+    };
+
     getFollowStatus();
     fetchPosts();
+    getSubscribePlan();
   }, []);
 
   const handleAddPost = () => {
@@ -194,6 +213,7 @@ const Posts = () => {
       <button onClick={handleCreateRoomClick}>Create Chat Room</button>
       <button onClick={handleFollowRequest}>followRequests</button>
       <button onClick={handleCreateUser}>user List</button>
+      <p>currentPlan = {SubscribePlan.plan}</p>
       <button onClick={handleCreateShowRoom}>show All Room</button>
       {posts.map((post) => (
         <div key={post.id}>
@@ -212,12 +232,12 @@ const Posts = () => {
           <button className="Edit" type="button" onClick={() => navigate(`/updateProduct/${post.id}`)}>
             Add Comment
           </button>
-          <button className="btn btn-primary btn-sm mx-5" type="button" onClick={() => {
+          {/* <button className="btn btn-primary btn-sm mx-5" type="button" onClick={() => {
             localStorage.setItem('accessPostId', post.userId);
             navigate(`/chatBody/${localStorage.getItem('accessPostId')}`);
           }}>
             Chat
-          </button>
+          </button> */}
           {/* <button  onClick={() => handleLikeDislikeClick(post.id)}>
             {like === 1 ? 'Unlike' : dislike === 1 ? 'Like' : 'Like'}
           </button> */}

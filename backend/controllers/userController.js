@@ -95,7 +95,6 @@ const genrateOTP = () => {
     expiration_time,
   };
   return (payload);
-
 }
 const otpPassword = Math.floor(1000 + Math.random() * 9000);
 
@@ -153,7 +152,7 @@ const sendPasswordOTP = async (req, res) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, loginType } = req.body;
 
     const existingUser = await sequelize.query(
       'SELECT * FROM users WHERE email = ?',
@@ -167,10 +166,11 @@ const registerUser = async (req, res) => {
       const result = await sequelize.query(
         'INSERT INTO users (email, password, name, loginType) VALUES (?, ?, ?, ?)',
         {
-          replacements: [email, password, name, 'Login'],
+          replacements: [email, password, name, loginType || 'Login'],
           type: QueryTypes.INSERT
         }
       );
+
     } else {
       console.log("user already registered");
       res.status(400).json({ error: 'User already registered' });
@@ -181,6 +181,101 @@ const registerUser = async (req, res) => {
   }
 };
 
+
+const subscribePlan = async (req, res) => {
+  const userId = req.user.id;
+  const plan = req.body.plan;
+
+  console.log(plan);
+
+  const [existingUser] = await sequelize.query('SELECT email FROM users WHERE id = ? ',
+    { replacements: [userId], type: QueryTypes.SELECT });
+
+  console.log(existingUser);
+
+  if (!plan) {
+    return res.status(400).json({ error: 'Plan is required' });
+  }
+
+  if (existingUser) {
+    try {
+      const planExpirationDate = new Date();
+      planExpirationDate.setMonth(planExpirationDate.getMonth() + (plan === 'premium' ? 1 : 2));
+
+      await sequelize.query(
+        'UPDATE users SET plan = ?, plan_expiration_date = ? WHERE id = ?',
+        {
+          replacements: [plan, planExpirationDate, userId],
+          type: QueryTypes.UPDATE
+        }
+      );
+
+      res.json({ message: 'User plan updated successfully', planExpirationDate });
+    } catch (error) {
+      res.status(500).json({ error: 'An error occurred while updating the user plan' });
+    }
+  } else {
+    res.status(404).json({ error: 'User not found' });
+  }
+};
+
+
+
+const getSubscribePlan = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const SubscribePlan = await sequelize.query(
+      'SELECT plan FROM users WHERE id = ?',
+      { replacements: [userId], type: QueryTypes.SELECT }
+    );
+    if (SubscribePlan.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    res.json(SubscribePlan[0]);
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+// check any error are there on this page or not 
+
+
+// const subscribePlanWithExpired = async (req, res) => {
+//   const userId = req.user.id;
+//   const plan = req.body.plan;
+
+//   console.log(plan);
+
+//   const [existingUser] = await sequelize.query('SELECT email FROM users WHERE id = ? ',
+//     { replacements: [userId], type: QueryTypes.SELECT });
+
+//   console.log(existingUser);
+
+//   if (!plan) {
+//     return res.status(400).json({ error: 'Plan is required' });
+//   }
+
+//   if (existingUser) {
+//     try {
+//       await sequelize.query(
+//         'UPDATE users SET plan = ? WHERE id = ?',
+//         {
+//           replacements: [plan, userId],
+//           type: QueryTypes.UPDATE
+//         }
+//       );
+
+//       res.json({ message: 'User plan updated successfully' });
+//     } catch (error) {
+//       res.status(500).json({ error: 'An error occurred while updating the user plan' });
+//     }
+//   } else {
+//     res.status(404).json({ error: 'User not found' });
+//   }
+// };
+
+// // i want to add in this if user select primiuam plan then valid one month and selcet preimiuam plus then valid two month i want to store plan buy date and exired date in mysql database
 
 
 
@@ -269,17 +364,24 @@ const loginUser = async (req, res) => {
     const [existingUser] = await sequelize.query('SELECT * FROM users WHERE email = ? AND password = ?',
       { replacements: [email, password], type: QueryTypes.SELECT });
 
-      const [existingUserLoginWith] = await sequelize.query('SELECT loginType FROM users WHERE email = ? ',
+    const [existingUserLoginWith] = await sequelize.query('SELECT loginType FROM users WHERE email = ? ',
+      { replacements: [email], type: QueryTypes.SELECT });
+
+      const [existingUserPlan] = await sequelize.query('SELECT plan FROM users WHERE email = ? ',
       { replacements: [email], type: QueryTypes.SELECT });
 
     if (existingUser && existingUserLoginWith.loginType == 'Login') {
 
       const user = existingUser;
 
+      const plan = existingUserPlan;
+
+      console.log(plan);
+
       const token = generateToken(user);
       const userId = user.id;
 
-      return res.status(200).send({ message: 'Login success!', token: token, userId: userId});
+      return res.status(200).send({ message: 'Login success!', token: token, userId: userId, plan: plan });
     } else {
       return res.status(404).send({ message: 'Email not found! Sign up!' });
     }
@@ -291,6 +393,13 @@ const loginUser = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+// provide me this api react js code with token authorized
+
 
 // Function to get user profile
 const getUserProfile = async (req, res) => {
@@ -320,7 +429,7 @@ const getUserProfileFollowOnly = async (req, res) => {
       AND (id IN (SELECT 	following_id FROM userfollows WHERE follower_id  = :userId AND status = 'accepted')
            OR id IN (SELECT 	follower_id  FROM userfollows WHERE following_id = :userId AND status = 'accepted'))`,
       {
-        replacements: { userId},
+        replacements: { userId },
         type: sequelize.QueryTypes.SELECT
       }
     );
@@ -429,14 +538,14 @@ const createRoom = async (req, res) => {
     console.log(req.body);
 
 
-    
+
 
     console.log(selectedUsers);
 
     await sequelize.query(
       'INSERT INTO rooms (user_id, userSelected_Name, created_user_id) VALUES (?, ?, ?)',
       {
-        replacements: [userSelected_id,userSelected_Name, userId],
+        replacements: [userSelected_id, userSelected_Name, userId],
         type: sequelize.QueryTypes.INSERT
       }
     );
@@ -462,7 +571,7 @@ const findRoomByUserId = async (req, res) => {
 
     console.log(rooms[0].user_id);
 
-    const finduserIdFromRoom = rooms[0].user_id.includes(userId); 
+    const finduserIdFromRoom = rooms[0].user_id.includes(userId);
 
 
     console.log(finduserIdFromRoom);
@@ -475,12 +584,12 @@ const findRoomByUserId = async (req, res) => {
       }
     );
 
-    const finduserIdFromCreatedRoom = roomsCreatedId[0].created_user_id === userId; 
+    const finduserIdFromCreatedRoom = roomsCreatedId[0].created_user_id === userId;
 
     console.log(roomsCreatedId, finduserIdFromCreatedRoom);
 
 
-    if(finduserIdFromRoom || finduserIdFromCreatedRoom){
+    if (finduserIdFromRoom || finduserIdFromCreatedRoom) {
       const roomsGet = await sequelize.query(
         'SELECT * FROM rooms ',
         {
@@ -491,7 +600,7 @@ const findRoomByUserId = async (req, res) => {
     }
 
 
-    
+
 
   } catch (error) {
     console.error('Error finding room by user ID:', error);
@@ -502,46 +611,46 @@ const findRoomByUserId = async (req, res) => {
 
 
 const googleLogin = async (req, res) => {
-  
+
   const [existingUser] = await sequelize.query('SELECT * FROM users WHERE email = ? ',
     { replacements: [req.user.email], type: QueryTypes.SELECT });
 
-    if (!existingUser) {
-      const result = await sequelize.query(
-        'INSERT INTO users (email, name, password, loginType) VALUES (?, ?, ?, ?)',
-        {
-          replacements: [req.user.email, req.user.name, null, 'google'],
-          type: QueryTypes.INSERT
-        }
-      );
-      res.redirect('http://localhost:3000');
-    } else if(existingUser){
+  if (!existingUser) {
+    const result = await sequelize.query(
+      'INSERT INTO users (email, name, password, loginType) VALUES (?, ?, ?, ?)',
+      {
+        replacements: [req.user.email, req.user.name, null, 'google'],
+        type: QueryTypes.INSERT
+      }
+    );
+    res.redirect('http://localhost:3000');
+  } else if (existingUser) {
 
 
-      const [existingUserLoginWith] = await sequelize.query('SELECT loginType FROM users WHERE email = ? ',
+    const [existingUserLoginWith] = await sequelize.query('SELECT loginType FROM users WHERE email = ? ',
       { replacements: [req.user.email], type: QueryTypes.SELECT });
 
-      console.log(existingUserLoginWith.loginType);
+    console.log(existingUserLoginWith.loginType);
 
-      if(existingUserLoginWith.loginType == 'google'){
-        const token = generateToken(existingUser);
-        console.log(token);
-        res.cookie("token", token);
-        const decoded = jwt.verify(token, 'crud');
-        console.log(decoded);
-        
-        console.log(existingUser.id);
-        console.log("user login with google" , token);
-        res.redirect('http://localhost:3000/allPost');
-        
-      }else{
-        console.log("user not login with google");
-      }
-      
+    if (existingUserLoginWith.loginType == 'google') {
+      const token = generateToken(existingUser);
+      console.log(token);
+      res.cookie("token", token);
+      const decoded = jwt.verify(token, 'crud');
+      console.log(decoded);
 
-    }else{
-      res.message('faileld');
+      console.log(existingUser.id);
+      console.log("user login with google", token);
+      res.redirect('http://localhost:3000/allPost');
+
+    } else {
+      console.log("user not login with google");
     }
+
+
+  } else {
+    res.message('faileld');
+  }
 
 }
 
@@ -637,6 +746,7 @@ module.exports = {
   registerUser,
   getMessagesSenderRoom,
   sendMessageRoom,
+  subscribePlan,
   getMessagesRoom,
   updateUserProfile,
   loginUser,
@@ -644,6 +754,7 @@ module.exports = {
   findRoomByUserId,
   getUserProfile,
   getImage,
+  getSubscribePlan,
   googleLogin,
   getUserProfileFollowOnly,
   OTPVerify,

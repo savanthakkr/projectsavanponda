@@ -254,7 +254,36 @@ const searchProducts = async (req, res) => {
 const addPost = async (req, res) => {
   try {
     const userId = req.user.id;
-    console.log(userId);
+    const userPlan = await sequelize.query(
+      'SELECT plan FROM users WHERE id = ?',
+      {
+        replacements: [userId],
+        type: QueryTypes.SELECT
+      }
+    );// get the user's plan from the database or other data source
+
+    console.log(userPlan[0].plan);
+
+    const postLimit = {
+      free: 1,
+      premium: 2,
+      premium_plus: 3
+    }[userPlan[0].plan];
+
+    // Get the current number of posts for the user
+    const currentPosts = await sequelize.query(
+      'SELECT COUNT(*) as count FROM posts WHERE userId = ?',
+      {
+        replacements: [userId],
+        type: QueryTypes.SELECT
+      }
+    );
+
+    // Check if the user has reached the post limit for their plan
+    if (currentPosts[0].count >= postLimit) {
+      return res.status(403).json({ error: `You have reached the maximum number of posts for your plan (${postLimit}).` });
+    }
+
     const { des } = req.body;
     const result = await sequelize.query(
       'INSERT INTO posts (des, userId) VALUES (?, ?)',
@@ -263,13 +292,37 @@ const addPost = async (req, res) => {
         type: QueryTypes.INSERT
       }
     );
-    // Return the ID of the newly created category
-    res.json({ message: 'Category created!', id: result[0] });
+
+    res.json({ message: 'Post created!', id: result[0] });
   } catch (error) {
-    console.error('Error creating category:', error);
+    console.error('Error creating post:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+// const addPostPrimiuam = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+//     console.log(userId);
+//     const { des } = req.body;
+//     const result = await sequelize.query(
+//       'INSERT INTO posts (des, userId) VALUES (?, ?)',
+//       {
+//         replacements: [des, userId],
+//         type: QueryTypes.INSERT
+//       }
+//     );
+//     // Return the ID of the newly created category
+//     res.json({ message: 'Category created!', id: result[0] });
+//   } catch (error) {
+//     console.error('Error creating category:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
+
+
+
 const addComment = async (req, res) => {
   try {
     const userId = req.user.id;

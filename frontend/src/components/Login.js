@@ -9,6 +9,29 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [cookies, removeCookie] = useCookies([]);
   const [password, setPassword] = useState('');
+  const [planDetails, setPlanDetails] = useState([]);
+    // Replace this with the actual user ID
+    const token = localStorage.getItem('accessToken');
+
+  const getFollowRequests = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/getPlanDetails', {
+        headers: {
+          Authorization: token,
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error('Error fetching follow requests');
+      }
+  
+      const data = await response.json();
+      setPlanDetails(data);
+      console.log(planDetails, "sdksjdksjdjs");
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,11 +50,21 @@ const Login = () => {
 
       if (response.status === 200) {
         const token = response.data.token;
+        const plan = response.data.plan.plan;
+        console.log(plan);
         console.log('Token:', token);
 
         localStorage.setItem('accessToken', token);
 
-        navigate('/allPost');
+        getFollowRequests();
+
+        if(plan == null){
+          navigate('/subscribePlan');
+        }else{
+          navigate('/allPost');
+        }
+
+        
       } else {
         console.log('Login failed:', response.data.message);
       }
@@ -106,3 +139,6 @@ const Login = () => {
 };
 
 export default Login;
+
+
+// in this check primiuam plan was already purchase then redirect to home otherwise if not purchase then show sucribtion screen 

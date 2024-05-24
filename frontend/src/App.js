@@ -22,6 +22,10 @@ import ChatRoomScreenMain from './components/chatRoomScreenMain';
 import UserList from './components/userList'; 
 import FollowRequests from './components/followRequest';
 import Subscription from './components/subscribePlan';
+import AdminLogin from './components/adminLogin';
+import UserListAdmin from './components/allUserAdmin';
+import UpdateUserAdmin from './components/editUserAdmin';
+import AddUserAdmin from './components/addUserAdmin';
 
 const socket = socketIO.connect('http://localhost:5000', {
     transports: ['websocket', 'polling']
@@ -41,6 +45,10 @@ function App() {
       <Route path="/updateProduct/:id" element={<UpdateProduct />} />
       <Route path="/register" element={<Register />} />
       <Route path="/subscribePlan" element={<Subscription />} />
+      <Route path="/UpdateUserAdmin/:id" element={<UpdateUserAdmin />} />
+      <Route path="/AdminLogin" element={<AdminLogin />} />
+      <Route path="/AddUserAdmin" element={<AddUserAdmin />} />
+      <Route path="/UserListAdmin" element={<UserListAdmin />} />
       <Route path='/otp' element={<OTPscreen/>}/>
       <Route path='/sendOTP' element={<SendOTPEmail/>}/>
       <Route path='/updatePass' element={<ForgatePass/>}/>

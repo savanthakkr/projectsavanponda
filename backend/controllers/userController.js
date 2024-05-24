@@ -395,7 +395,39 @@ const loginUser = async (req, res) => {
 };
 
 
+const adminLoginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
+    const [existingUser] = await sequelize.query('SELECT * FROM admin WHERE email = ?',
+      { replacements: [email], type: QueryTypes.SELECT });
+
+    if (existingUser) {
+
+      const user = existingUser;
+
+
+      if (password == user.password) {
+
+        const token = generateToken(user);
+        const userId = user.id;
+        const userRole = user.userRole;
+
+        return res.status(200).send({ message: 'Login success!', token: token, userId: userId, userRole: userRole });
+      } else {
+        return res.status(401).send({ message: 'Incorrect password!' });
+      }
+    } else {
+      return res.status(404).send({ message: 'Email not found! Sign up!' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: 'Error in login check api!',
+      error
+    });
+  }
+};
 
 
 // provide me this api react js code with token authorized
@@ -742,16 +774,92 @@ const getMessagesSenderRoom = async (req, res) => {
   res.json(messages);
 }
 
+
+
+// admin 
+
+
+
+const getUserProfileAllAdmin = async (req, res) => {
+  try {
+    const users = await sequelize.query(
+      'SELECT * FROM users ',
+      {
+        type: sequelize.QueryTypes.SELECT
+      }
+    );
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+const getUserAdminById = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await sequelize.query(
+      'SELECT * FROM users WHERE id = ?',
+      { replacements: [userId], type: QueryTypes.SELECT }
+    );
+    if (user.length === 0) {
+      return res.status(404).json({ error: 'user not found' });
+    }
+    res.json(user[0]);
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Function to update a product
+const updateUserAdmin = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { email, name, plan } = req.body;
+
+    await sequelize.query(
+      'UPDATE users SET email = ?, name = ?, plan = ? WHERE id = ?',
+      { replacements: [email, name, plan, userId], type: QueryTypes.UPDATE }
+    );
+    res.json({ message: 'users updated successfully' });
+  } catch (error) {
+    console.error('Error updating users:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+const deleteUserAdmin = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    sequelize.query(
+      'DELETE FROM users WHERE id = ? ',
+      { replacements: [userId], type: QueryTypes.DELETE }
+    );
+    res.json({ message: 'users deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting users:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
   registerUser,
   getMessagesSenderRoom,
   sendMessageRoom,
+  getUserAdminById,
+  updateUserAdmin,
   subscribePlan,
+  getUserProfileAllAdmin,
   getMessagesRoom,
   updateUserProfile,
+  deleteUserAdmin,
   loginUser,
   createRoom,
   findRoomByUserId,
+  adminLoginUser,
   getUserProfile,
   getImage,
   getSubscribePlan,

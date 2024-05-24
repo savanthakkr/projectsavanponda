@@ -214,6 +214,7 @@ const Posts = () => {
       <button onClick={handleFollowRequest}>followRequests</button>
       <button onClick={handleCreateUser}>user List</button>
       <p>currentPlan = {SubscribePlan.plan}</p>
+      
       <button onClick={handleCreateShowRoom}>show All Room</button>
       {posts.map((post) => (
         <div key={post.id}>

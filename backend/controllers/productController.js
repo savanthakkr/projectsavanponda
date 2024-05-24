@@ -664,9 +664,9 @@ const getFollowStatus = async (req, res) => {
   const userId = req.user.id;
 
   const followStatus = await sequelize.query(
-    'SELECT followStatus FROM user_follows WHERE user_id = ?',
+    'SELECT * FROM userfollows WHERE (follower_id  = ? OR following_id = ?) AND status = ?',
     {
-      replacements: [userId],
+      replacements: [userId, userId, 'accepted'],
       type: sequelize.QueryTypes.SELECT
     }
   );

@@ -81,6 +81,11 @@ const Login = () => {
     navigate(path);
   }
 
+  const routeAdmin = () => {
+    let path = `/AdminLogin`; 
+    navigate(path);
+  }
+
   const changeGoogleRout = async () => {
     console.log(cookies.token, "skjdjkshdasiudaopidaudeoiqwhdeqwewmnebdasnbdnmasdb asmndbasmndbasnmdb")
     if (!cookies.token) {
@@ -133,6 +138,7 @@ const Login = () => {
         <br></br>
         <br></br>
         <button type="submit" className="btn btn-primary w-100" onClick={routeChange}>Register</button>
+        <button type="submit" className="btn btn-primary w-100" onClick={routeAdmin}>Admin</button>
       </div>
     </Container>
   );

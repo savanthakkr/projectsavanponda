@@ -7,18 +7,16 @@ const UpdateUserAdmin = () => {
 
   const navigate = useNavigate();
   const { id } = useParams();
-  const [plan, setPlan] = useState('free');
 
   const token = localStorage.getItem('accessToken');
   // const bookId = localStorage.getItem('accessBookId');
 
-
+  const [plan, setPlan] = useState('free'); // initialize with a default value
 
   const [productData, setproductData] = useState({});
-
+  
   useEffect(() => {
     const fetchproductData = async () => {
-
       try {
         const response = await fetch(`http://localhost:5000/api/getUserAdminById/${id}`, {
           headers: {
@@ -27,6 +25,7 @@ const UpdateUserAdmin = () => {
         });
         const data = await response.json();
         setproductData(data);
+        setPlan(data.plan || 'free'); // update the plan state when productData is fetched
         console.log(data)
       } catch (error) {
         console.error('Error fetching product data:', error);
@@ -41,6 +40,7 @@ const UpdateUserAdmin = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setproductData({ ...productData, [name]: value });
+    setPlan(value); // set the plan state here
   };
 
 
@@ -106,37 +106,35 @@ const UpdateUserAdmin = () => {
             <label htmlFor="email" className="form-label">email</label>
             <input type="text" className="form-control" id="email" name="email" value={productData.email} onChange={handleChange} />
           </div>
-          <div className="mb-3">
-          <label>
-                    Plan:
-                    <div>
-                        <input
-                            type="radio"
-                            value={productData.free}
-                            checked={plan === 'free'}
-                            onChange={handleChange}
-                        />
-                        Free
-                    </div>
-                    <div>
-                        <input
-                            type="radio"
-                            value={productData.premium}
-                            checked={plan === 'premium'}
-                            onChange={handleChange}
-                        />
-                        Premium
-                    </div>
-                    <div>
-                        <input
-                            type="radio"
-                            value={productData.premium_plus}
-                            checked={plan === 'premium_plus'}
-                            onChange={handleChange}
-                        />
-                        Premium Plus
-                    </div>
-                </label>
+          <div>
+            <input
+              type="radio"
+              value="free"
+              checked={plan === 'free'}
+              onChange={handleChange}
+              name="plan" // add name attribute here
+            />
+            Free
+          </div>
+          <div>
+            <input
+              type="radio"
+              value="premium"
+              checked={plan === 'premium'}
+              onChange={handleChange}
+              name="plan" // add name attribute here
+            />
+            Premium
+          </div>
+          <div>
+            <input
+              type="radio"
+              value="premium_plus"
+              checked={plan === 'premium_plus'}
+              onChange={handleChange}
+              name="plan" // add name attribute here
+            />
+            Premium Plus
           </div>
           <button type="submit" className="btn btn-primary">Update product</button>
         </form>

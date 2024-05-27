@@ -59,9 +59,15 @@ const UserListAdmin = () => {
     navigate(path);
   }
 
+  const showAllPostAdmin = () => {
+    let path = `/getPostAdmin`; 
+    navigate(path);
+  }
+
   return (
     <div>
         <button type="submit" className="btn btn-primary w-10" onClick={routeAdmin}>AddUserAdmin</button>
+        <button type="submit" className="btn btn-primary w-10" onClick={showAllPostAdmin}>AddUserAdmin</button>
       <table>
         <thead>
           <tr>

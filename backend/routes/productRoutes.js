@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
-const {getFollowStatus, getFollowRequests, declineFollowRequest, acceptFollowRequest, follow, unfollow, createProduct, getAllProducts, getProductById,followUnfollow,getMessages,getMessagesSender, updateProduct,sendMessage, deleteProduct, searchProducts,addPost,addComment,addlike,addlike_dislike,adddislike,countLike,getPost, getCommentsByPostId, getPostByPostId} = productController;
+const {getCommentForEditAdminById, updateCommentAdmin,  getCommnetsAdminById, getPostAdminById, updatePostAdmin, getFollowStatus,getPostAdmin, getFollowRequests, declineFollowRequest, acceptFollowRequest, follow, unfollow, createProduct, getAllProducts, getProductById,getMessages,getMessagesSender, updateProduct,sendMessage, deleteProduct, searchProducts,addPost,addComment,addlike,addlike_dislike,adddislike,countLike,getPost, getCommentsByPostId, getPostByPostId} = productController;
 const { verifyToken } = require("../middlewares/roleMiddleware");
 
 // Create a new product
@@ -16,6 +16,10 @@ router.post('/adddlikedislike',verifyToken, addlike_dislike);
 
 router.put('/acceptFollowRequest',verifyToken, acceptFollowRequest);
 
+router.put('/updatePostAdmin/:id',verifyToken, updatePostAdmin);
+
+router.put('/updateCommentsById/:id',verifyToken, updateCommentAdmin);
+
 router.post('/declineFollowRequest',verifyToken, declineFollowRequest);
 
 router.post('/follow',verifyToken, follow);
@@ -24,7 +28,6 @@ router.delete('/unfollow',verifyToken, unfollow);
 
 router.post('/sendMessage/:id',verifyToken, sendMessage);
 
-router.post('/userFollow',verifyToken, followUnfollow);
 
 router.post('/addComment/:id',verifyToken, addComment);
 
@@ -33,6 +36,10 @@ router.post('/addlike',verifyToken, addlike);
 router.get('/getFollowRequests',verifyToken, getFollowRequests);
 
 router.get('/countLike/:id',verifyToken, countLike);
+
+router.get('/getPostAdminById/:id',verifyToken, getPostAdminById);
+
+router.get('/getCommentForEditAdminById/:id',verifyToken, getCommentForEditAdminById);
 
 router.get('/getFollowStatus',verifyToken, getFollowStatus);
 
@@ -44,7 +51,11 @@ router.get('/comments/:id',verifyToken, getCommentsByPostId);
 
 router.get('/getPostId/:id',verifyToken, getPostByPostId);
 
+router.get('/getCommnetsAdminById/:id',verifyToken, getCommnetsAdminById);
+
 router.get('/getPost',verifyToken, getPost);
+
+router.get('/getPostAdmin',verifyToken, getPostAdmin);
 
 // Get all products
 router.get('/products',verifyToken, getAllProducts);

@@ -26,6 +26,10 @@ import AdminLogin from './components/adminLogin';
 import UserListAdmin from './components/allUserAdmin';
 import UpdateUserAdmin from './components/editUserAdmin';
 import AddUserAdmin from './components/addUserAdmin';
+import GetPostAdmin from './components/allPostAdmin';
+import UpdatePostAdmin from './components/editPostAdmin';
+import UpdateCommentAdmin from './components/editComment';
+import GetCommentsByPostId from './components/showAllCommentAdmin';
 
 const socket = socketIO.connect('http://localhost:5000', {
     transports: ['websocket', 'polling']
@@ -49,6 +53,10 @@ function App() {
       <Route path="/AdminLogin" element={<AdminLogin />} />
       <Route path="/AddUserAdmin" element={<AddUserAdmin />} />
       <Route path="/UserListAdmin" element={<UserListAdmin />} />
+      <Route path="/getPostAdmin" element={<GetPostAdmin />} />
+      <Route path='/updatePostAdmin/:id' element={<UpdatePostAdmin/>}/>
+      <Route path='/getCommentsByPostId/:id' element={<GetCommentsByPostId/>}/>
+      <Route path='/updateCommentsById/:id' element={<UpdateCommentAdmin/>}/>
       <Route path='/otp' element={<OTPscreen/>}/>
       <Route path='/sendOTP' element={<SendOTPEmail/>}/>
       <Route path='/updatePass' element={<ForgatePass/>}/>

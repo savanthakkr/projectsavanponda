@@ -612,49 +612,7 @@ const declineFollowRequest = async (req, res) => {
 
 
 
-const followUnfollow = async (req, res) => {
-  const { followingId } = req.body;
-  const userId = req.user.id;
 
-  try {
-    const isFollowing = await sequelize.query(
-      'SELECT followStatus FROM user_follows WHERE user_id = ? AND following_user_id = ?',
-      {
-        replacements: [userId, followingId],
-        type: sequelize.QueryTypes.SELECT
-      }
-    );
-    if (!isFollowing || !isFollowing.length) {
-      await sequelize.query(
-        'INSERT INTO user_follows (following_user_id, user_id, followStatus) VALUES (?, ?, ?)',
-        {
-          replacements: [followingId, userId, 'follow'],
-          type: sequelize.QueryTypes.INSERT
-        }
-      );
-    } else if (isFollowing[0].followStatus === 'follow') {
-      await sequelize.query(
-        'UPDATE user_follows SET followStatus = ? WHERE following_user_id = ? AND user_id = ?',
-        {
-          replacements: ['unfollow', followingId, userId],
-          type: sequelize.QueryTypes.UPDATE
-        }
-      );
-    } else {
-      await sequelize.query(
-        'UPDATE user_follows SET followStatus = ? WHERE following_user_id = ? AND user_id = ?',
-        {
-          replacements: ['follow', followingId, userId],
-          type: sequelize.QueryTypes.UPDATE
-        }
-      );
-    }
-    res.json({ message: 'follow or unfollow successfully added' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'An error occurred' });
-  }
-};
 
 
 
@@ -726,7 +684,126 @@ const getMessagesSender = async (req, res) => {
 }
 
 
+// admin api 
 
+
+const getPostAdmin = async (req, res) => {
+  try {
+    const posts = await sequelize.query(
+      `
+      SELECT p.id, p.des, p.userId, u.name as userName, 
+      (SELECT GROUP_CONCAT(comment SEPARATOR ', ') FROM comments c WHERE c.postId = p.id) as comments,
+      (SELECT GROUP_CONCAT(id SEPARATOR ', ') FROM comments c WHERE c.postId = p.id) as commentsId,
+      (SELECT COUNT(*) FROM comments c WHERE c.postId = p.id) as commentCount,
+      (SELECT COUNT(*) FROM likes_post l WHERE l.post_id = p.id AND l.like_type = 'like') as likeCount
+      FROM posts p
+      LEFT JOIN users u ON p.userId = u.id
+      GROUP BY p.id;
+      `,
+      { type: sequelize.QueryTypes.SELECT }
+    );
+    res.json(posts);
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+const getPostAdminById = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const posts = await sequelize.query(
+      'SELECT * FROM posts WHERE id = ?',
+      { replacements: [postId], type: QueryTypes.SELECT }
+    );
+    if (posts.length === 0) {
+      return res.status(404).json({ error: 'posts not found' });
+    }
+    res.json(posts[0]);
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+const getCommentForEditAdminById = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const posts = await sequelize.query(
+      'SELECT * FROM comments WHERE id = ?',
+      { replacements: [postId], type: QueryTypes.SELECT }
+    );
+    if (posts.length === 0) {
+      return res.status(404).json({ error: 'posts not found' });
+    }
+    res.json(posts[0]);
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+const getCommnetsAdminById = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const posts = await sequelize.query(
+      `
+        SELECT c.*, u.name AS userName
+        FROM comments c
+        JOIN users u ON c.userId = u.id
+        WHERE c.postId = ?
+      `,
+      { replacements: [postId], type: QueryTypes.SELECT }
+    );
+    if (posts.length === 0) {
+      return res.status(404).json({ error: 'posts not found' });
+    }
+    res.json(posts);
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+// get in this api with name from users table where userId = id
+
+const updateCommentAdmin = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const { comment } = req.body;
+
+    await sequelize.query(
+      'UPDATE comments SET comment = ? WHERE id = ?',
+      { replacements: [comment, postId], type: QueryTypes.UPDATE }
+    );
+    res.json({ message: 'posts updated successfully' });
+  } catch (error) {
+    console.error('Error updating posts:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+const updatePostAdmin = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const { des } = req.body;
+
+    await sequelize.query(
+      'UPDATE posts SET des = ? WHERE id = ?',
+      { replacements: [des, postId], type: QueryTypes.UPDATE }
+    );
+    res.json({ message: 'posts updated successfully' });
+  } catch (error) {
+    console.error('Error updating posts:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+// call this api in react js and show all data in table formate 
 
 // today complated task 
 
@@ -736,4 +813,4 @@ const getMessagesSender = async (req, res) => {
 // count total number of like 
 
 
-module.exports = {getFollowRequests, acceptFollowRequest, declineFollowRequest, follow, unfollow, getFollowStatus, followUnfollow, getMessages,getMessagesSender, sendMessage, createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, searchProducts, addPost, countLike, addlike, addlike_dislike, adddislike, addComment, getPost, getCommentsByPostId, getPostByPostId };
+module.exports = {getCommentForEditAdminById, updateCommentAdmin, getCommnetsAdminById, getPostAdminById, updatePostAdmin, getPostAdmin, getFollowRequests, acceptFollowRequest, declineFollowRequest, follow, unfollow, getFollowStatus, getMessages, getMessagesSender, sendMessage, createProduct, getAllProducts, getProductById, updateProduct, deleteProduct, searchProducts, addPost, countLike, addlike, addlike_dislike, adddislike, addComment, getPost, getCommentsByPostId, getPostByPostId };

@@ -803,7 +803,6 @@ const updatePostAdmin = async (req, res) => {
 };
 
 
-// call this api in react js and show all data in table formate 
 
 // today complated task 
 

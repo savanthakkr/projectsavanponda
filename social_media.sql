@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: May 22, 2024 at 06:25 AM
+-- Generation Time: May 27, 2024 at 06:28 AM
 -- Server version: 8.2.0
 -- PHP Version: 8.1.26
 
@@ -20,6 +20,27 @@ SET time_zone = "+00:00";
 --
 -- Database: `social_media`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admin`
+--
+
+DROP TABLE IF EXISTS `admin`;
+CREATE TABLE IF NOT EXISTS `admin` (
+  `id` int NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `password` varchar(150) NOT NULL,
+  `createdAt` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `admin`
+--
+
+INSERT INTO `admin` (`id`, `email`, `password`, `createdAt`) VALUES
+(0, 'savanponda11@gmail.com', 'Savan', '2024-05-24 05:25:55');
 
 -- --------------------------------------------------------
 
@@ -44,8 +65,8 @@ CREATE TABLE IF NOT EXISTS `comments` (
 
 INSERT INTO `comments` (`id`, `comment`, `userId`, `postId`) VALUES
 (1, 'savan', 2, 1),
-(2, 'asasas', 2, 1),
-(3, 'asas', 2, 1),
+(2, 'ponda', 2, 1),
+(3, 'asas', 1, 1),
 (4, 'hiii', 2, 2),
 (5, 'hello all', 2, 1);
 
@@ -184,7 +205,7 @@ CREATE TABLE IF NOT EXISTS `posts` (
 
 INSERT INTO `posts` (`id`, `des`, `userId`) VALUES
 (1, 'savan', 2),
-(2, 'hello', 1),
+(2, 'hello savan', 1),
 (3, 'second', 2),
 (5, 'third', 2),
 (6, 'fouth', 2),
@@ -234,14 +255,15 @@ CREATE TABLE IF NOT EXISTS `userfollows` (
   PRIMARY KEY (`id`),
   KEY `follower_id` (`follower_id`),
   KEY `following_id` (`following_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `userfollows`
 --
 
 INSERT INTO `userfollows` (`id`, `follower_id`, `following_id`, `status`, `created_at`, `updated_at`) VALUES
-(13, 1, 5, 'accepted', '2024-05-21 05:49:26', '2024-05-21 06:05:10');
+(22, 2, 1, 'accepted', '2024-05-24 04:48:52', '2024-05-24 04:48:57'),
+(21, 1, 2, 'accepted', '2024-05-24 04:47:04', '2024-05-24 04:47:09');
 
 -- --------------------------------------------------------
 
@@ -260,18 +282,20 @@ CREATE TABLE IF NOT EXISTS `users` (
   `updatedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `plan_expiration_date` date NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `email`, `password`, `name`, `loginType`, `plan`, `updatedAt`, `plan_expiration_date`) VALUES
-(1, 'savan11@gmail.com', 'savan', 'savan', 'Login', 'premium_plus', '2024-05-22 11:32:18', '0000-00-00'),
+(1, 'savan11@gmail.com', 'savan', 'savanthakkrponda', 'Login', 'premium_plus', '2024-05-22 11:32:18', '0000-00-00'),
 (2, 'savanponda22@gmail.com', 'savanponda', 'savan ponda', 'Login', 'premium', '2024-05-22 11:32:18', '0000-00-00'),
 (3, 'savan111@gmail.com', 'savanthakkr', 'savan', 'Login', 'premium', '2024-05-22 11:32:18', '0000-00-00'),
 (4, 'hiii@gmail.com', 'hello', 'hello', 'Login', 'premium', '2024-05-22 11:32:18', '2024-06-22'),
-(5, 'sponda.netclues@gmail.com', 'savan', 'Savan Ponda', 'google', NULL, '2024-05-22 11:32:18', '0000-00-00');
+(30, 'admin@gmail.com', 'Admin', 'admin', 'Login', 'premium', '2024-05-24 06:21:53', '0000-00-00'),
+(31, 'helloadmin@gmail.com', 'Admin@123', 'helloAdmin', 'Login', 'free', '2024-05-24 06:25:19', '0000-00-00'),
+(32, 'hiiadmin11@gmail.com', 'hiiadmin', 'hiiiadmin', 'Login', 'free', '2024-05-24 06:27:23', '0000-00-00');
 
 -- --------------------------------------------------------
 

@@ -444,6 +444,51 @@ const countLike = async (req, res) => {
 // Get total number of likes and dislikes for a post
 const getPost = async (req, res) => {
   try {
+
+    const userId = req.user.id;
+
+    console.log(userId);
+
+    const isFollowing = await sequelize.query(
+      'SELECT * FROM userfollows WHERE follower_id  = ? OR following_id = ?',
+      {
+        replacements: [userId, userId],
+        type: sequelize.QueryTypes.SELECT
+      }
+    );
+
+
+    console.log(...isFollowing);
+
+    const getPostUserid = await sequelize.query(
+      'SELECT userId FROM posts',
+      {
+        type: sequelize.QueryTypes.SELECT
+      }
+    );
+
+    console.log(getPostUserid);
+
+    // in this array check 2 and 3 are avilable or not in this array 
+
+
+    // check if 2 and 3 are available in the array
+    if (getPostUserid.includes(2) && getPostUserid.includes(3)) {
+      console.log('Both 2 and 3 are available in the array');
+    } else if (getPostUserid.includes(2)) {
+      console.log('Only 2 is available in the array');
+    } else if (getPostUserid.includes(3)) {
+      console.log('Only 3 is available in the array');
+    } else {
+      console.log('Neither 2 nor 3 are available in the array');
+    }
+
+    if(isFollowing.length == 2){
+      console.log("is two");
+    }else{
+      console.log("is one");
+    }
+
     const posts = await sequelize.query(
       `
       SELECT p.id, p.des, p.userId, u.name as userName, (SELECT GROUP_CONCAT(comment SEPARATOR ', ') FROM comments c WHERE c.postId = p.id) as comments,
@@ -751,7 +796,7 @@ const getCommnetsAdminById = async (req, res) => {
     const posts = await sequelize.query(
       `
         SELECT c.*, u.name AS userName
-        FROM comments c
+        FROM comments c  
         JOIN users u ON c.userId = u.id
         WHERE c.postId = ?
       `,

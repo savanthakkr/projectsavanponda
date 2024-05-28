@@ -16,6 +16,9 @@ const Posts = () => {
   const [FollowStatus, setFollowStatus] = useState([]);
   const [SubscribePlan, setSubscribePlan] = useState([]);
   // const [like, setLike] = useState(0);
+  const [cart, setCart] = useState(
+    JSON.parse(localStorage.getItem("cart")) || []
+  );
   const [dislike, setDislike] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -204,6 +207,19 @@ const Posts = () => {
   const handleFollowRequest = () => {
     navigate('/followRequests');
   };
+  const addToCart = (product) => {
+    const existingProduct = cart.find((item) => item.id === product.id);
+    if (existingProduct) {
+      setCart(
+        cart.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        )
+      );
+    } else {
+      setCart([...cart, { ...product, quantity: 1 }]);
+    }
+    localStorage.setItem("cart", JSON.stringify(cart));
+  };
 
   return (
     <div>
@@ -233,6 +249,7 @@ const Posts = () => {
           <button className="Edit" type="button" onClick={() => navigate(`/updateProduct/${post.id}`)}>
             Add Comment
           </button>
+          <button onClick={() => addToCart(post)}>Add to Cart</button>
           {/* <button className="btn btn-primary btn-sm mx-5" type="button" onClick={() => {
             localStorage.setItem('accessPostId', post.userId);
             navigate(`/chatBody/${localStorage.getItem('accessPostId')}`);
@@ -245,7 +262,14 @@ const Posts = () => {
         </div>
 
       ))}
+      <h2>Cart:</h2>
+      <ul>
+        {cart.map((product) => (
+          <li key={product.id}>{product.des}</li>
+        ))}
+      </ul>
     </div>
+    
   );
 };
 

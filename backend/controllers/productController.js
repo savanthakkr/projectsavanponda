@@ -441,63 +441,44 @@ const countLike = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-// Get total number of likes and dislikes for a post
+
+// show only this post if i will follow or he can follow me 
+
 const getPost = async (req, res) => {
   try {
 
     const userId = req.user.id;
 
-    console.log(userId);
-
-    const isFollowing = await sequelize.query(
-      'SELECT * FROM userfollows WHERE follower_id  = ? OR following_id = ?',
+    const users = await sequelize.query(
+      `SELECT * FROM users
+      WHERE id!= :userId
+      AND (id IN (SELECT 	following_id FROM userfollows WHERE follower_id  = :userId AND status = 'accepted')
+           OR id IN (SELECT 	follower_id  FROM userfollows WHERE following_id = :userId AND status = 'accepted'))`,
       {
-        replacements: [userId, userId],
+        replacements: { userId },
         type: sequelize.QueryTypes.SELECT
       }
     );
+    
+    const userIds = users.map(user => user.id);
+    console.log(userIds); // [1, 2, 3, 4, 5,...]
 
 
-    console.log(...isFollowing);
-
-    const getPostUserid = await sequelize.query(
-      'SELECT userId FROM posts',
-      {
-        type: sequelize.QueryTypes.SELECT
-      }
-    );
-
-    console.log(getPostUserid);
-
-    // in this array check 2 and 3 are avilable or not in this array 
-
-
-    // check if 2 and 3 are available in the array
-    if (getPostUserid.includes(2) && getPostUserid.includes(3)) {
-      console.log('Both 2 and 3 are available in the array');
-    } else if (getPostUserid.includes(2)) {
-      console.log('Only 2 is available in the array');
-    } else if (getPostUserid.includes(3)) {
-      console.log('Only 3 is available in the array');
-    } else {
-      console.log('Neither 2 nor 3 are available in the array');
-    }
-
-    if(isFollowing.length == 2){
-      console.log("is two");
-    }else{
-      console.log("is one");
-    }
 
     const posts = await sequelize.query(
       `
-      SELECT p.id, p.des, p.userId, u.name as userName, (SELECT GROUP_CONCAT(comment SEPARATOR ', ') FROM comments c WHERE c.postId = p.id) as comments,
+      SELECT p.id, p.des, p.userId, u.name as userName, 
+      (SELECT GROUP_CONCAT(comment SEPARATOR ', ') FROM comments c WHERE c.postId = p.id) as comments,
       (SELECT COUNT(*) FROM likes_post l WHERE l.post_id = p.id AND l.like_type = 'like') as likeCount
       FROM posts p
       LEFT JOIN users u ON p.userId = u.id
+      WHERE p.userId IN (:userIds)
       GROUP BY p.id;
       `,
-      { type: sequelize.QueryTypes.SELECT }
+      {
+        replacements: { userIds },
+        type: sequelize.QueryTypes.SELECT
+      }
     );
     res.json(posts);
   } catch (error) {
@@ -505,6 +486,32 @@ const getPost = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+
+// this is getPost matehod is a show alll post like public api 
+
+
+// const getPost = async (req, res) => {
+//   try {
+
+//     const userId = req.user.id;
+//     const posts = await sequelize.query(
+//       `
+//       SELECT p.id, p.des, p.userId, u.name as userName, (SELECT GROUP_CONCAT(comment SEPARATOR ', ') FROM comments c WHERE c.postId = p.id) as comments,
+//       (SELECT COUNT(*) FROM likes_post l WHERE l.post_id = p.id AND l.like_type = 'like') as likeCount
+//       FROM posts p
+//       LEFT JOIN users u ON p.userId = u.id
+//       GROUP BY p.id;
+//       `,
+//       { type: sequelize.QueryTypes.SELECT }
+//     );
+//     res.json(posts);
+//   } catch (error) {
+//     console.error('Error fetching posts:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
 
 const addlike_dislike = async (req, res) => {
   const { postId } = req.body;
@@ -701,6 +708,21 @@ const getMessages = async (req, res) => {
   console.log(receiverId);
   const senderId = req.params.id;
 
+
+  const usernames = await sequelize.query(
+    `
+      SELECT u1.name AS receiverUsername, u2.name AS senderUsername
+      FROM users u1, users u2
+      WHERE u1.id =? AND u2.id =?
+    `,
+    {
+      replacements: [receiverId, senderId],
+      type: sequelize.QueryTypes.SELECT
+    }
+  );
+
+  console.log(usernames);
+
   const messages = await sequelize.query(
     'SELECT * FROM messages WHERE (sender_id = ? AND receiver_id = ?) OR (receiver_id = ? AND sender_id = ?)  ORDER BY timestamp ASC',
     {
@@ -709,7 +731,7 @@ const getMessages = async (req, res) => {
     }
   );
 
-  res.json(messages);
+  res.json([messages, usernames]);
 }
 
 const getMessagesSender = async (req, res) => {

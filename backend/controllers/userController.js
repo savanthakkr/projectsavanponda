@@ -466,6 +466,7 @@ const getUserProfileFollowOnly = async (req, res) => {
       }
     );
     res.json(users);
+    console.log(users);
   } catch (error) {
     console.error('Error fetching user profile:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -558,20 +559,16 @@ const updatepassword = async (req, res) => {
 
 const createRoom = async (req, res) => {
   try {
-    const { selectedUsers, selected_Users_Name } = req.body;
+    const { selectedUsers, selectedUserNames } = req.body;
     const userId = req.user.id;
 
 
     const userSelected_id = JSON.stringify(selectedUsers);
-    const userSelected_Name = JSON.stringify(selected_Users_Name);
+    const userSelected_Name = JSON.stringify(selectedUserNames);
 
     console.log(userSelected_id);
     console.log(userSelected_Name);
     console.log(req.body);
-
-
-
-
     console.log(selectedUsers);
 
     await sequelize.query(
@@ -747,15 +744,28 @@ const getMessagesRoom = async (req, res) => {
   console.log(receiverId);
   const senderId = req.params.id;
 
-  const messages = await sequelize.query(
-    'SELECT * FROM group_chat WHERE room_id = ? ORDER BY created_at ASC',
+  const rooms = await sequelize.query(
+    'SELECT * FROM rooms WHERE id = ?',
     {
-      replacements: [senderId, receiverId, receiverId, senderId],
+      replacements: [senderId],
       type: sequelize.QueryTypes.SELECT
     }
   );
 
-  res.json(messages);
+  console.log(rooms);
+
+  const name = [...rooms];
+  
+
+  const messages = await sequelize.query(
+    'SELECT * FROM group_chat WHERE room_id = ? ORDER BY created_at ASC',
+    {
+      replacements: [senderId],
+      type: sequelize.QueryTypes.SELECT
+    }
+  );
+
+  res.json([messages, rooms]);
 }
 
 const getMessagesSenderRoom = async (req, res) => {

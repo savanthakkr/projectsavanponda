@@ -7,6 +7,7 @@ const ChatBody = ({ socket }) => {
 
   const [messages, setMessages] = useState([])
   const [messagesDatabase, setMessagesdatabase] = useState([])
+  const [messagesDatabaseName, setMessagesdatabaseName] = useState([])
   const [typingStatus, setTypingStatus] = useState("")
   const lastMessageRef = useRef(null);
   const token = localStorage.getItem('accessToken');
@@ -43,8 +44,10 @@ const ChatBody = ({ socket }) => {
               'Content-Type': 'application/json'
             }
           });
-          setMessagesdatabase(response.data);
+          setMessagesdatabase(response.data[0]);
+          setMessagesdatabaseName(response.data[1]);
           console.log(response.data);
+          console.log(response.data[1]);
         } catch (error) {
           console.error("Error fetching messages:", error);
         }
@@ -88,6 +91,11 @@ const ChatBody = ({ socket }) => {
 
   return (
     <>
+    {messagesDatabaseName.map(message => (
+          <div className="message__chats" key={message.id}>
+          <p>Chat With : {message.senderUsername}</p>
+        </div>
+        ))}
       <div className='message__container'>
         {messages.map(message => (
           message.name === localStorage.getItem("userName") ? (
@@ -109,7 +117,7 @@ const ChatBody = ({ socket }) => {
 
         {messagesDatabase.map(message => (
           message.name === localStorage.getItem("userName") ? (
-            <div className="message__chats" key={message.id}>
+            <div className="message__chats" key={message.id}> 
               <p className='sender__name'>You</p>
               <div className='message__sender'>
                 <p>{message.content}</p>

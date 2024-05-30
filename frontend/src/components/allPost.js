@@ -116,9 +116,6 @@ const Posts = () => {
     xhr.send(JSON.stringify({ postId }));
   };
 
-  const handleCommentClick = (postId) => {
-    // Add your code here to handle comment submission
-  };
 
   const handleFollowClick = async (userId) => {
     try {
